@@ -67,7 +67,6 @@
             font-size: 2em;
         }
 
-        .theme-toggle, .login-btn {
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
@@ -77,7 +76,6 @@
             transition: transform 0.2s;
         }
 
-        .theme-toggle:hover, .login-btn:hover {
             transform: scale(1.05);
         }
 
@@ -236,7 +234,6 @@
             font-weight: bold;
         }
 
-        .buy-btn, .sell-btn {
             padding: 6px 12px;
             border: none;
             border-radius: 6px;
@@ -245,11 +242,9 @@
             transition: transform 0.2s;
         }
 
-        .buy-btn:hover, .sell-btn:hover {
             transform: scale(1.05);
         }
 
-        .buy-btn {
             background: var(--positive);
             color: white;
         }
@@ -294,7 +289,6 @@
             border: 1px solid var(--border-color);
         }
 
-        .modal-content input {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -433,7 +427,6 @@
             <div class="table-container">
                 <div id="loading" class="loading">Loading cryptocurrency data...</div>
                 <div id="table-content" style="display: none;">
-                    <table id="crypto-table">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -473,7 +466,6 @@
         <!-- Transactions Tab -->
         <div id="transactions-tab" class="tab-content">
             <div class="table-container">
-                <table id="transactions-table">
                     <thead>
                         <tr><th>Date</th><th>Coin</th><th>Type</th><th>Amount</th><th>Price</th><th>Total</th></tr>
                     </thead>
@@ -488,16 +480,7 @@
         </div>
     </div>
 
-    <!-- Buy Modal -->
-    <div id="buy-modal" class="modal">
         <div class="modal-content">
-            <h3>➕ Buy Cryptocurrency</h3>
-            <p id="modal-coin-name" style="margin: 10px 0; font-size: 18px;"></p>
-            <label>Amount:</label>
-            <input type="number" id="modal-amount" placeholder="Enter amount" step="any" value="1">
-            <p id="modal-total-price" style="margin: 10px 0; font-size: 16px; font-weight: bold;">Total: $0</p>
-            <button onclick="confirmBuy()" style="background: var(--positive);"> Confirm Purchase</button>
-            <button onclick="closeBuyModal()"> Cancel</button>
         </div>
     </div>
 
@@ -527,37 +510,25 @@
 
     <script>
         let currentData = [];
-        let currentCoinForBuy = null;
-        let currentUser = null;
 
         // Check authentication on load
         checkAuth();
 
         async function checkAuth() {
-            try {
                 const response = await fetch('/api/check-auth');
                 const data = await response.json();
 
                 if (data.authenticated) {
-                    currentUser = data;
                     document.getElementById('user-info-header').innerHTML = `
-                        <span class="balance-display"> $${(data.balance || 10000).toLocaleString()}</span>
                         <span> ${data.username}</span>
                         <button class="logout-btn" onclick="logout()">Logout</button>
                     `;
-                    document.getElementById('user-balance').innerHTML = `$${(data.balance || 10000).toLocaleString()}`;
                     loadPortfolio();
                     loadTransactions();
                     loadUserProfile();
                 } else {
                     document.getElementById('user-info-header').innerHTML = `
-                        <button class="login-btn" onclick="showLoginModal()"> Login / Register</button>
                     `;
-                    document.getElementById('portfolio-tab').innerHTML = '<div style="text-align:center;padding:50px">🔐 Please login to view portfolio</div>';
-                    document.getElementById('transactions-tab').innerHTML = '<div style="text-align:center;padding:50px">🔐 Please login to view transactions</div>';
-                }
-            } catch (error) {
-                console.error('Auth check error:', error);
             }
         }
 
@@ -589,7 +560,6 @@
                 return;
             }
 
-            try {
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -598,16 +568,12 @@
 
                 const data = await response.json();
                 if (response.ok) {
-                    alert(' Login successful!');
                     closeLoginModal();
                     checkAuth();
                     loadCryptoData();
                 } else {
                     alert(data.error);
                 }
-            } catch (error) {
-                alert('Network error. Please try again.');
-            }
         }
 
         async function register() {
@@ -625,7 +591,6 @@
                 return;
             }
 
-            try {
                 const response = await fetch('/api/register', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -639,20 +604,15 @@
                 } else {
                     alert(data.error);
                 }
-            } catch (error) {
-                alert('Network error. Please try again.');
-            }
         }
 
         async function logout() {
             await fetch('/api/logout', {method: 'POST'});
-            currentUser = null;
             checkAuth();
             location.reload();
         }
 
         async function loadUserProfile() {
-            try {
                 const response = await fetch('/api/user-profile');
                 const user = await response.json();
 
@@ -661,7 +621,6 @@
                         <div class="stat-card"><h3>Username</h3><div class="value">${user.username}</div></div>
                         <div class="stat-card"><h3>Email</h3><div class="value">${user.email}</div></div>
                         <div class="stat-card"><h3>Role</h3><div class="value">${user.role}</div></div>
-                        <div class="stat-card"><h3>Balance</h3><div class="value">$${(user.balance || 10000).toLocaleString()}</div></div>
                         <div class="stat-card"><h3>Member Since</h3><div class="value">${new Date(user.created_at).toLocaleDateString()}</div></div>
                     </div>
                     <div class="controls">
@@ -671,9 +630,6 @@
                         <button onclick="changePassword()">Update Password</button>
                     </div>
                 `;
-            } catch (error) {
-                console.error('Error loading profile:', error);
-            }
         }
 
         async function changePassword() {
@@ -690,7 +646,6 @@
                 return;
             }
 
-            try {
                 const response = await fetch('/api/change-password', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -705,9 +660,6 @@
                 } else {
                     alert(data.error);
                 }
-            } catch (error) {
-                alert(' Network error');
-            }
         }
 
         function formatNumber(num) {
@@ -779,85 +731,36 @@
                     <td class="${changeClass}">${changeSymbol} ${Math.abs(change24h).toFixed(2)}%</td>
                     <td>${formatNumber(crypto.market_cap)}</td>
                     <td>${formatNumber(crypto.total_volume)}</td>
-                    <td><button class="buy-btn" onclick='showBuyModal("${crypto.id}", "${crypto.name}", "${crypto.symbol}", ${crypto.current_price})'>💰 Buy</button></td>
                 `;
             });
         }
 
-        function showBuyModal(coinId, coinName, coinSymbol, price) {
-            if (!currentUser) {
-                alert(' Please login first to buy cryptocurrency!');
-                showLoginModal();
-                return;
-            }
-
-            currentCoinForBuy = {id: coinId, name: coinName, symbol: coinSymbol, price: price};
-            document.getElementById('modal-coin-name').innerHTML = `<strong>${coinName}</strong> (${coinSymbol.toUpperCase()}) - $${price} each`;
-            document.getElementById('modal-amount').value = 1;
-            updateTotalPrice();
-            document.getElementById('buy-modal').style.display = 'flex';
 
             document.getElementById('modal-amount').oninput = function() {
-                updateTotalPrice();
-            };
-        }
-
-        function updateTotalPrice() {
-            const amount = parseFloat(document.getElementById('modal-amount').value) || 0;
-            const total = amount * currentCoinForBuy.price;
             document.getElementById('modal-total-price').innerHTML = ` Total: $${total.toFixed(2)}`;
         }
 
-        async function confirmBuy() {
             const amount = parseFloat(document.getElementById('modal-amount').value);
-
             if (!amount || amount <= 0) {
                 alert(' Please enter a valid amount');
                 return;
             }
 
-            const totalCost = amount * currentCoinForBuy.price;
-
-            // Check if user has enough balance
-            const balanceResponse = await fetch('/api/check-auth');
-            const userData = await balanceResponse.json();
-
-            if (userData.balance < totalCost) {
-                alert(` Insufficient balance! You have $${userData.balance.toFixed(2)}, need $${totalCost.toFixed(2)}`);
-                return;
-            }
-
-            try {
                 const response = await fetch('/api/portfolio/add', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        coin_id: currentCoinForBuy.id,
-                        coin_name: currentCoinForBuy.name,
-                        coin_symbol: currentCoinForBuy.symbol,
                         amount: amount,
-                        price: currentCoinForBuy.price
                     })
                 });
 
                 const data = await response.json();
                 if (response.ok) {
-                    alert(` Successfully purchased ${amount} ${currentCoinForBuy.symbol.toUpperCase()}!`);
-                    closeBuyModal();
-                    checkAuth(); // Refresh balance
                     loadPortfolio();
                     loadTransactions();
                 } else {
                     alert(data.error);
                 }
-            } catch (error) {
-                alert(' Network error. Please try again.');
-            }
-        }
-
-        function closeBuyModal() {
-            document.getElementById('buy-modal').style.display = 'none';
-            currentCoinForBuy = null;
         }
 
         async function loadPortfolio() {
@@ -875,8 +778,6 @@
                     return;
                 }
 
-                let portfolioHtml = '';
-                for (const item of portfolio) {
                     const currentCoin = currentData.find(c => c.id === item.coin_id);
                     const currentPrice = currentCoin ? currentCoin.current_price : item.purchase_price;
                     const currentValue = currentPrice * item.amount;
@@ -887,7 +788,6 @@
                     portfolioValue += currentValue;
                     totalCost += cost;
 
-                    portfolioHtml += `
                         <div class="portfolio-item">
                             <div>
                                 <strong>${item.coin_name}</strong> (${item.coin_symbol.toUpperCase()})<br>
@@ -898,20 +798,15 @@
                                  Current: $${currentPrice.toFixed(2)}
                             </div>
                             <div class="${profitLoss >= 0 ? 'positive' : 'negative'}">
-                                ${profitLoss >= 0 ? '📈 +' : '📉 '} $${Math.abs(profitLoss).toFixed(2)} (${profitLossPercent.toFixed(2)}%)
                             </div>
                             <div>
                                  Value: $${currentValue.toFixed(2)}
                             </div>
                         </div>
                     `;
-                }
 
                 document.getElementById('portfolio-list').innerHTML = portfolioHtml;
                 document.getElementById('portfolio-value').innerHTML = `$${portfolioValue.toFixed(2)}`;
-                const totalPL = portfolioValue - totalCost;
-                document.getElementById('total-pl').innerHTML = `${totalPL >= 0 ? '📈 +' : '📉 '} $${Math.abs(totalPL).toFixed(2)}`;
-                document.getElementById('total-pl').className = totalPL >= 0 ? 'positive' : 'negative';
             } catch (error) {
                 console.error('Error loading portfolio:', error);
             }
@@ -932,7 +827,6 @@
                     <tr>
                         <td>${new Date(t.timestamp).toLocaleString()}</td>
                         <td>${t.coin_name}</td>
-                        <td class="${t.type === 'buy' ? 'positive' : 'negative'}">${t.type === 'buy' ? ' BUY' : '💸 SELL'}</td>
                         <td>${t.amount}</td>
                         <td>$${t.price.toFixed(2)}</td>
                         <td>$${t.total.toFixed(2)}</td>
@@ -962,7 +856,6 @@
             body.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
 
-            if (currentUser) {
                 fetch('/api/settings/theme', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
