@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - CryptoDashboard Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            padding: 30px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+        }
+
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .role-admin {
+            background: #ef4444;
+            color: white;
+        }
+
+        .role-user {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-active {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .status-inactive {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        .btn-edit {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            min-width: 400px;
+        }
+
+        .modal-content select, .modal-content button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👑 Admin Dashboard</h1>
+            <a href="/" style="color: white; text-decoration: none;">← Back to Dashboard</a>
+        </div>
+
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <div class="value" id="total-users">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Today</h3>
+                <div class="value" id="active-today">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Portfolios</h3>
+                <div class="value" id="total-portfolios">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Logins</h3>
+                <div class="value" id="total-logins">-</div>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="showTab('users')">👥 Users</button>
+            <button class="tab-btn" onclick="showTab('logs')">📝 System Logs</button>
+        </div>
+
+        <div id="users-tab" class="tab-content active">
+            <h2>User Management</h2>
+            <div style="overflow-x: auto;">
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Last Login</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="logs-tab" class="tab-content">
+            <h2>System Logs</h2>
+            <div style="overflow-x: auto;">
+                <table id="logs-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <h3>Edit User</h3>
+            <select id="edit-role">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+            <select id="edit-status">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
+            <button onclick="saveUserEdit()">Save Changes</button>
+            <button onclick="closeModal()" style="background: #ccc;">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        let currentEditUserId = null;
+
+        async function loadStats() {
+            const response = await fetch('/api/admin/stats');
+            const stats = await response.json();
+            document.getElementById('total-users').innerText = stats.total_users;
+            document.getElementById('active-today').innerText = stats.active_today;
+            document.getElementById('total-portfolios').innerText = stats.total_portfolios;
+            document.getElementById('total-logins').innerText = stats.total_logins;
+        }
+
+        async function loadUsers() {
+            const response = await fetch('/api/admin/users');
+            const users = await response.json();
+            const tbody = document.getElementById('users-body');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td><span class="role-badge role-${user.role}">${user.role}</span></td>
+                    <td class="${user.is_active ? 'status-active' : 'status-inactive'}">${user.is_active ? 'Active' : 'Inactive'}</td>
+                    <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                    <td>${user.last_login ? new Date(user.last_login).toLocaleString() : 'Never'}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editUser(${user.id}, '${user.role}', ${user.is_active})">Edit</button>
+                        <button class="btn-delete" onclick="deleteUser(${user.id})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        async function loadLogs() {
+            const response = await fetch('/api/admin/logs');
+            const logs = await response.json();
+            const tbody = document.getElementById('logs-body');
+            tbody.innerHTML = '';
+
+            logs.forEach(log => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${new Date(log.timestamp).toLocaleString()}</td>
+                    <td>${log.username}</td>
+                    <td>${log.action}</td>
+                    <td>${log.details}</td>
+                `;
+            });
+        }
+
+        function editUser(id, role, isActive) {
+            currentEditUserId = id;
+            document.getElementById('edit-role').value = role;
+            document.getElementById('edit-status').value = isActive;
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        async function saveUserEdit() {
+            const role = document.getElementById('edit-role').value;
+            const isActive = document.getElementById('edit-status').value === 'true';
+
+            const response = await fetch(`/api/admin/users/${currentEditUserId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({role, is_active: isActive})
+            });
+
+            if (response.ok) {
+                alert('User updated successfully');
+                closeModal();
+                loadUsers();
+            } else {
+                alert('Error updating user');
+            }
+        }
+
+        async function deleteUser(id) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                const response = await fetch(`/api/admin/users/${id}`, {method: 'DELETE'});
+                if (response.ok) {
+                    alert('User deleted successfully');
+                    loadUsers();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Error deleting user');
+                }
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        function showTab(tab) {
+            document.getElementById('users-tab').classList.remove('active');
+            document.getElementById('logs-tab').classList.remove('active');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            if (tab === 'users') {
+                document.getElementById('users-tab').classList.add('active');
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+                loadUsers();
+            } else {
+                document.getElementById('logs-tab').classList.add('active');
+                document.querySelector('.tab-btn:last-child').classList.add('active');
+                loadLogs();
+            }
+        }
+
+        // Initial load
+        loadStats();
+        loadUsers();
+    </script>
+</body>
+</html>
